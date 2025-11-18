@@ -4,6 +4,18 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: '选择构建类型'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - android-only
+          - ios-only
+          - desktop-only
 jobs:
   build-mac-ios-android:
     runs-on: macos-latest
