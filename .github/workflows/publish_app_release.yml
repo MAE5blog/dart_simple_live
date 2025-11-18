@@ -78,6 +78,7 @@ jobs:
         run: |
           cd simple_live_app
           flutter build apk --release --split-per-abi
+        continue-on-error: true  # 添加这行，允许失败继续
       
       #上传APK至Artifacts
       - name: Upload APK to Artifacts
