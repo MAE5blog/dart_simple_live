@@ -682,8 +682,9 @@ class DouyinSite implements LiveSite {
         "webid": "7382872326016435738",
       },
     );
-    //var requlestUrl = await getAbogusUrl(uri.toString());
-    var requlestUrl = uri.toString();
+    // 抖音搜索需要 a_bogus 和 msToken，使用内置 JS 生成
+    var requlestUrl =
+        DouyinSign.getAbogusUrl(uri.toString(), kDefaultUserAgent);
     var headResp = await HttpClient.instance.head(
       'https://live.douyin.com',
       header: headers,
