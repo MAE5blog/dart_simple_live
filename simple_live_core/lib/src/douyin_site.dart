@@ -643,6 +643,7 @@ class DouyinSite implements LiveSite {
     int page = 1,
   }) async {
     String serverUrl = "https://www.douyin.com/aweme/v1/web/live/search/";
+    // 先构造原始 URL，再用 JS 生成 a_bogus/msToken
     var uri = Uri.parse(serverUrl).replace(
       scheme: "https",
       port: 443,
@@ -685,8 +686,13 @@ class DouyinSite implements LiveSite {
     // 抖音搜索需要 a_bogus 和 msToken，使用内置 JS 生成
     var requlestUrl =
         DouyinSign.getAbogusUrl(uri.toString(), kDefaultUserAgent);
+    // 把生成的 msToken 也放进 Cookie
+    var requestMsToken =
+        Uri.parse(requlestUrl).queryParameters["msToken"] ?? "";
+
+    // 预取抖音主页拿 ttwid/__ac_nonce
     var headResp = await HttpClient.instance.head(
-      'https://live.douyin.com',
+      'https://www.douyin.com',
       header: headers,
     );
     var dyCookie = "";
@@ -699,6 +705,9 @@ class DouyinSite implements LiveSite {
         dyCookie += "$cookie;";
       }
     });
+    if (requestMsToken.isNotEmpty) {
+      dyCookie += "msToken=$requestMsToken;";
+    }
 
     var result = await HttpClient.instance.getJson(
       requlestUrl,
