@@ -14,6 +14,26 @@ class DouyinSearchController extends BaseController {
   InAppWebViewController? webViewController;
   final TextEditingController manualController = TextEditingController();
 
+  String? _extractRoomId(String text) {
+    final uri = Uri.tryParse(text);
+    if (uri != null && uri.host.contains("live.douyin.com")) {
+      // 取第一个非空 path segment 作为房间号，忽略查询参数
+      final seg = uri.pathSegments.firstWhere(
+        (s) => s.isNotEmpty,
+        orElse: () => "",
+      );
+      if (seg.isNotEmpty) {
+        return seg;
+      }
+      // 兜底正则
+      final match = RegExp(
+        r"live\.douyin\.com/([\w\-]+)",
+      ).firstMatch(uri.toString());
+      return match?.group(1);
+    }
+    return null;
+  }
+
   void onWebViewCreated(InAppWebViewController controller) {
     webViewController = controller;
   }
@@ -48,19 +68,13 @@ class DouyinSearchController extends BaseController {
       Get.snackbar('提示', '请输入房间号或直播间链接');
       return;
     }
-    String? rid;
     final uri = Uri.tryParse(text);
-    if (uri != null) {
-      if (uri.host.contains("live.douyin.com")) {
-        rid = RegExp(
-          r"live\.douyin\.com/([\d|\w]+)",
-        ).firstMatch(uri.toString())?.group(1);
-      } else if (uri.host.contains("v.douyin.com")) {
-        Get.snackbar('提示', '请使用 live.douyin.com 链接或房间号');
-        return;
-      }
+    if (uri != null && uri.host.contains("v.douyin.com")) {
+      Get.snackbar('提示', '请使用 live.douyin.com 链接或房间号');
+      return;
     }
-    rid ??= text;
+    String? rid = _extractRoomId(text);
+    rid ??= text; // 直接输入房间号
     if (rid.isEmpty) {
       Get.snackbar('提示', '未识别到房间号，请检查输入');
       return;
@@ -82,12 +96,8 @@ class DouyinSearchController extends BaseController {
   ) async {
     if (createWindowAction.request.url?.host == "live.douyin.com") {
       {
-        var regExp = RegExp(r"live\.douyin\.com/([\d|\w]+)");
-        var id =
-            regExp
-                .firstMatch(createWindowAction.request.url.toString())
-                ?.group(1) ??
-            "";
+        final id =
+            _extractRoomId(createWindowAction.request.url.toString()) ?? "";
 
         AppNavigator.toLiveRoomDetail(site: site, roomId: id);
         return false;
