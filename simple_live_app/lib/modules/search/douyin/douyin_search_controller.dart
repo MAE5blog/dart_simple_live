@@ -25,9 +25,7 @@ class DouyinSearchController extends BaseController {
   /// 搜索模式，0=直播间，1=主播
   var searchMode = 0.obs;
   final Site site;
-  DouyinSearchController(
-    this.site,
-  );
+  DouyinSearchController(this.site);
 
   var searchUrl = "https://www.douyin.com/search/dnf?type=live";
 
@@ -39,9 +37,7 @@ class DouyinSearchController extends BaseController {
         "https://www.douyin.com/search/${Uri.encodeComponent(keyword)}?type=live";
     if (Platform.isAndroid || Platform.isIOS) {
       webViewController!.loadUrl(
-        urlRequest: URLRequest(
-          url: WebUri(searchUrl),
-        ),
+        urlRequest: URLRequest(url: WebUri(searchUrl)),
       );
     }
   }
@@ -56,9 +52,9 @@ class DouyinSearchController extends BaseController {
     final uri = Uri.tryParse(text);
     if (uri != null) {
       if (uri.host.contains("live.douyin.com")) {
-        rid = RegExp(r"live\.douyin\.com/([\d|\w]+)")
-            .firstMatch(uri.toString())
-            ?.group(1);
+        rid = RegExp(
+          r"live\.douyin\.com/([\d|\w]+)",
+        ).firstMatch(uri.toString())?.group(1);
       } else if (uri.host.contains("v.douyin.com")) {
         Get.snackbar('提示', '请使用 live.douyin.com 链接或房间号');
         return;
@@ -80,12 +76,15 @@ class DouyinSearchController extends BaseController {
     pageLoadding.value = true;
   }
 
-  Future<bool?> onCreateWindow(InAppWebViewController controller,
-      CreateWindowAction createWindowAction) async {
+  Future<bool?> onCreateWindow(
+    InAppWebViewController controller,
+    CreateWindowAction createWindowAction,
+  ) async {
     if (createWindowAction.request.url?.host == "live.douyin.com") {
       {
         var regExp = RegExp(r"live\.douyin\.com/([\d|\w]+)");
-        var id = regExp
+        var id =
+            regExp
                 .firstMatch(createWindowAction.request.url.toString())
                 ?.group(1) ??
             "";
