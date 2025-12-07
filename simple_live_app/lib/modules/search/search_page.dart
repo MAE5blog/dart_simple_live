@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/sites.dart';
+import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/modules/search/search_controller.dart';
 import 'package:simple_live_app/modules/search/search_list_view.dart';
+import 'package:simple_live_app/modules/search/douyin/douyin_search_view.dart';
 
 class SearchPage extends GetView<AppSearchController> {
   const SearchPage({Key? key}) : super(key: key);
@@ -13,52 +15,63 @@ class SearchPage extends GetView<AppSearchController> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: TextField(
-          controller: controller.searchController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: "搜点什么吧",
-            border: OutlineInputBorder(
-              borderRadius: AppStyle.radius24,
-            ),
-            contentPadding: AppStyle.edgeInsetsH12,
-            prefixIcon: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: Get.back,
-                  icon: const Icon(Icons.arrow_back),
-                ),
-                Obx(
-                  () => DropdownButton<int>(
-                    underline: const SizedBox(),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 0,
-                        child: Text("房间"),
+        title: GetBuilder<AppSearchController>(
+          builder: (_) {
+            final isDouyin =
+                Sites.supportSites[controller.index].id == Constant.kDouyin;
+            return TextField(
+              controller: controller.searchController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: "搜点什么吧",
+                border: OutlineInputBorder(borderRadius: AppStyle.radius24),
+                contentPadding: AppStyle.edgeInsetsH12,
+                prefixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: Get.back,
+                      icon: const Icon(Icons.arrow_back),
+                    ),
+                    Obx(
+                      () => DropdownButton<int>(
+                        underline: const SizedBox(),
+                        items: const [
+                          DropdownMenuItem(value: 0, child: Text("房间")),
+                          DropdownMenuItem(value: 1, child: Text("主播")),
+                        ],
+                        value: controller.searchMode.value,
+                        onChanged: (e) {
+                          controller.searchMode.value = e ?? 0;
+                          controller.doSearch();
+                        },
                       ),
-                      DropdownMenuItem(
-                        value: 1,
-                        child: Text("主播"),
-                      ),
-                    ],
-                    value: controller.searchMode.value,
-                    onChanged: (e) {
-                      controller.searchMode.value = e ?? 0;
-                      controller.doSearch();
-                    },
-                  ),
+                    ),
+                    AppStyle.hGap8,
+                  ],
                 ),
-                AppStyle.hGap8,
-              ],
-            ),
-            suffixIcon: IconButton(
-              onPressed: controller.doSearch,
-              icon: const Icon(Icons.search),
-            ),
-          ),
-          onSubmitted: (e) {
-            controller.doSearch();
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isDouyin)
+                      IconButton(
+                        tooltip: "抖音房间直达",
+                        onPressed: () {
+                          Get.to(() => const DouyinSearchView());
+                        },
+                        icon: const Icon(Icons.live_tv),
+                      ),
+                    IconButton(
+                      onPressed: controller.doSearch,
+                      icon: const Icon(Icons.search),
+                    ),
+                  ],
+                ),
+              ),
+              onSubmitted: (e) {
+                controller.doSearch();
+              },
+            );
           },
         ),
         bottom: TabBar(
@@ -71,10 +84,7 @@ class SearchPage extends GetView<AppSearchController> {
                   //text: e.name,
                   child: Row(
                     children: [
-                      Image.asset(
-                        e.logo,
-                        width: 24,
-                      ),
+                      Image.asset(e.logo, width: 24),
                       AppStyle.hGap8,
                       Text(e.name),
                     ],
@@ -91,15 +101,14 @@ class SearchPage extends GetView<AppSearchController> {
         physics: const NeverScrollableScrollPhysics(),
         controller: controller.tabController,
         children: Sites.supportSites
-            .map((e) => SearchListView(
-                      e.id,
-                    )
-                // (e) => e.id == Constant.kDouyin
-                //     ? const DouyinSearchView()
-                //     : SearchListView(
-                //         e.id,
-                //       ),
-                )
+            .map(
+              (e) => SearchListView(e.id),
+              // (e) => e.id == Constant.kDouyin
+              //     ? const DouyinSearchView()
+              //     : SearchListView(
+              //         e.id,
+              //       ),
+            )
             .toList(),
       ),
     );

@@ -23,6 +23,7 @@ class AppSearchController extends GetxController
       }
 
       index = currentIndex;
+      update();
       // if (Sites.supportSites[index].id == Constant.kDouyin) {
       //   return;
       // }
