@@ -280,9 +280,7 @@ class DouyinSite implements LiveSite {
 
     var roomStatus = status == 2;
     // 主要是为了获取cookie,用于弹幕websocket连接
-    final wsCookie = await _buildDanmakuCookie(webRid);
-    final wsCookie = await _buildDanmakuCookie(webRid);
-    final wsCookie = await _buildDanmakuCookie(webRid);
+    var headers = await getRequestHeaders();
 
     return LiveRoomDetail(
       roomId: webRid,
@@ -301,7 +299,7 @@ class DouyinSite implements LiveSite {
         webRid: webRid,
         roomId: roomId,
         userId: userUniqueId,
-        cookie: wsCookie,
+        cookie: headers["cookie"],
       ),
       data: room["stream_url"],
     );
@@ -363,7 +361,7 @@ class DouyinSite implements LiveSite {
         webRid: webRid,
         roomId: roomId,
         userId: userUniqueId,
-        cookie: wsCookie,
+        cookie: headers["cookie"],
       ),
       data: roomStatus ? roomData["stream_url"] : {},
     );
@@ -407,7 +405,7 @@ class DouyinSite implements LiveSite {
         webRid: webRid,
         roomId: roomId,
         userId: userUniqueId,
-        cookie: wsCookie,
+        cookie: headers["cookie"],
       ),
       data: roomStatus ? room["stream_url"] : {},
     );
@@ -446,13 +444,6 @@ class DouyinSite implements LiveSite {
       }
     });
     return dyCookie;
-  }
-
-  Future<String> _buildDanmakuCookie(String webRid) async {
-    // 合并通用 cookie 与房间页面 cookie（含 ttwid/__ac_nonce/msToken）
-    final base = (await getRequestHeaders())["cookie"] ?? "";
-    final extra = await _getWebCookie(webRid);
-    return [base, extra].where((e) => e.isNotEmpty).join(";");
   }
 
   /// 通过webRid获取直播间Web信息
