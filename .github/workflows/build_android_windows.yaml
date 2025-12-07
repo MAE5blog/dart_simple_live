@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'Branch or tag to build (default: dev)'
+        description: 'Branch or tag to build (default: master)'
         required: false
-        default: 'dev'
+        default: 'master'
 
 jobs:
   android:
@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.ref || 'dev' }}
+          ref: ${{ github.event.inputs.ref || 'master' }}
 
       - name: Download Android keystore
         id: android_keystore
@@ -75,7 +75,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.ref || 'dev' }}
+          ref: ${{ github.event.inputs.ref || 'master' }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
