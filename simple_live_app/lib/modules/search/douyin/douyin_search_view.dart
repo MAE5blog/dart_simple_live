@@ -35,13 +35,42 @@ class DouyinSearchView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text(
-                      "暂不支持抖音搜索，请打开浏览器搜索，然后复制直播间链接进行解析",
+                      "抖音搜索暂不可用，可直接输入房间号或 live.douyin.com 链接进入",
                       textAlign: TextAlign.center,
                     ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: 420,
+                      child: TextField(
+                        controller: controller.manualController,
+                        decoration: const InputDecoration(
+                          labelText: "房间号或直播间链接",
+                          border: OutlineInputBorder(),
+                        ),
+                        onSubmitted: (_) => controller.goToRoomByInput(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: controller.goToRoomByInput,
+                          icon: const Icon(Icons.play_circle_outline),
+                          label: const Text("直接进入直播间"),
+                        ),
+                        const SizedBox(width: 12),
+                        TextButton.icon(
+                          onPressed: controller.openBrowser,
+                          icon: const Icon(Icons.open_in_browser),
+                          label: const Text("打开浏览器搜索"),
+                        ),
+                      ],
+                    ),
                     TextButton.icon(
-                      onPressed: controller.openBrowser,
-                      icon: const Icon(Icons.open_in_browser),
-                      label: const Text("打开浏览器"),
+                      onPressed: () => controller.manualController.clear(),
+                      icon: const Icon(Icons.clear),
+                      label: const Text("清空输入"),
                     ),
                   ],
                 ),

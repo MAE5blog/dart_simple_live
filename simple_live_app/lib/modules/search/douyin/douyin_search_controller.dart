@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
@@ -11,6 +12,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class DouyinSearchController extends BaseController {
   InAppWebViewController? webViewController;
+  final TextEditingController manualController = TextEditingController();
 
   void onWebViewCreated(InAppWebViewController controller) {
     webViewController = controller;
@@ -44,6 +46,32 @@ class DouyinSearchController extends BaseController {
     }
   }
 
+  void goToRoomByInput() {
+    final text = manualController.text.trim();
+    if (text.isEmpty) {
+      Get.snackbar('提示', '请输入房间号或直播间链接');
+      return;
+    }
+    String? rid;
+    final uri = Uri.tryParse(text);
+    if (uri != null) {
+      if (uri.host.contains("live.douyin.com")) {
+        rid = RegExp(r"live\.douyin\.com/([\d|\w]+)")
+            .firstMatch(uri.toString())
+            ?.group(1);
+      } else if (uri.host.contains("v.douyin.com")) {
+        Get.snackbar('提示', '请使用 live.douyin.com 链接或房间号');
+        return;
+      }
+    }
+    rid ??= text;
+    if (rid.isEmpty) {
+      Get.snackbar('提示', '未识别到房间号，请检查输入');
+      return;
+    }
+    AppNavigator.toLiveRoomDetail(site: site, roomId: rid);
+  }
+
   void onLoadStop(InAppWebViewController controller, Uri? uri) async {
     pageLoadding.value = false;
   }
@@ -73,5 +101,11 @@ class DouyinSearchController extends BaseController {
   void openBrowser() {
     launchUrlString(searchUrl);
     Get.offAndToNamed(RoutePath.kTools);
+  }
+
+  @override
+  void onClose() {
+    manualController.dispose();
+    super.onClose();
   }
 }
