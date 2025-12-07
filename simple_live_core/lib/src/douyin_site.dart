@@ -690,12 +690,15 @@ class DouyinSite implements LiveSite {
     var requestMsToken =
         Uri.parse(requlestUrl).queryParameters["msToken"] ?? "";
 
-    // 预取抖音主页拿 ttwid/__ac_nonce
+    // 预取抖音主页拿 ttwid/__ac_nonce（附带默认 ttwid）
     var headResp = await HttpClient.instance.head(
       'https://www.douyin.com',
-      header: headers,
+      header: {
+        "User-Agent": kDefaultUserAgent,
+        "Referer": "https://www.douyin.com/",
+      },
     );
-    var dyCookie = "";
+    var dyCookie = "${cookie.isNotEmpty ? cookie : kDefaultCookie};";
     headResp.headers["set-cookie"]?.forEach((element) {
       var cookie = element.split(";")[0];
       if (cookie.contains("ttwid")) {
