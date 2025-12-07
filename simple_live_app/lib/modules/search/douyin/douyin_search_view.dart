@@ -16,9 +16,9 @@ class DouyinSearchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final overlay = Positioned.fill(
+    return KeepAliveWrapper(
       child: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: AppStyle.edgeInsetsA12,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -62,59 +62,15 @@ class DouyinSearchView extends StatelessWidget {
                 icon: const Icon(Icons.clear),
                 label: const Text("清空输入"),
               ),
+              const SizedBox(height: 12),
+              if (Platform.isAndroid || Platform.isIOS)
+                const Text(
+                  "提示：官方搜索被限制，请直接输入房间号或 live 链接",
+                  style: TextStyle(color: Colors.grey),
+                ),
             ],
           ),
         ),
-      ),
-    );
-
-    return KeepAliveWrapper(
-      child: Stack(
-        children: [
-          if (Platform.isAndroid || Platform.isIOS)
-            Positioned.fill(
-              child: InAppWebView(
-                onWebViewCreated: controller.onWebViewCreated,
-                onLoadStop: controller.onLoadStop,
-                onLoadStart: controller.onLoadStart,
-                initialSettings: InAppWebViewSettings(
-                  useOnLoadResource: true,
-                  userAgent:
-                      "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/118.0.0.0",
-                  useShouldOverrideUrlLoading: true,
-                ),
-                onCreateWindow: controller.onCreateWindow,
-                shouldOverrideUrlLoading:
-                    (webController, navigationAction) async {
-                      var uri = navigationAction.request.url;
-                      if (uri == null) {
-                        return NavigationActionPolicy.ALLOW;
-                      }
-                      if (uri.host == "live.douyin.com") {
-                        final id =
-                            controller._extractRoomId(
-                              navigationAction.request.url.toString(),
-                            ) ??
-                            "";
-
-                        AppNavigator.toLiveRoomDetail(
-                          site: controller.site,
-                          roomId: id,
-                        );
-                        return NavigationActionPolicy.CANCEL;
-                      }
-                      return NavigationActionPolicy.ALLOW;
-                    },
-              ),
-            ),
-          overlay,
-          Obx(
-            () => Visibility(
-              visible: controller.pageLoadding.value,
-              child: const AppLoaddingWidget(),
-            ),
-          ),
-        ],
       ),
     );
   }
