@@ -6,6 +6,7 @@ import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/modules/search/search_controller.dart';
 import 'package:simple_live_app/modules/search/search_list_view.dart';
 import 'package:simple_live_app/modules/search/douyin/douyin_search_view.dart';
+import 'package:simple_live_app/modules/search/douyin/douyin_search_controller.dart';
 
 class SearchPage extends GetView<AppSearchController> {
   const SearchPage({Key? key}) : super(key: key);
@@ -57,7 +58,14 @@ class SearchPage extends GetView<AppSearchController> {
                       IconButton(
                         tooltip: "抖音房间直达",
                         onPressed: () {
-                          Get.to(() => const DouyinSearchView());
+                          if (!Get.isRegistered<DouyinSearchController>()) {
+                            Get.lazyPut(
+                              () => DouyinSearchController(
+                                Sites.allSites[Constant.kDouyin]!,
+                              ),
+                            );
+                          }
+                          Get.to(() => const DouyinSearchStandalonePage());
                         },
                         icon: const Icon(Icons.live_tv),
                       ),
@@ -111,6 +119,20 @@ class SearchPage extends GetView<AppSearchController> {
             )
             .toList(),
       ),
+    );
+  }
+}
+
+class DouyinSearchStandalonePage extends StatelessWidget {
+  const DouyinSearchStandalonePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("抖音房间直达"),
+      ),
+      body: const DouyinSearchView(),
     );
   }
 }
